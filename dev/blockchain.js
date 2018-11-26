@@ -1,8 +1,14 @@
 const sha256 = require('sha256');
+const conexaoAtualUrl = process.argv[3];
+const uuid = require('uuid/v1');
 
 function Blockchain() {
+
     this.chain = []; // todos os blocos mineirados na cadeia ficaram nesse array
     this.pedingTransactions = []; // novas transações antes de serem colocadas no bloco
+
+    this.conexaoAtualUrl = conexaoAtualUrl;
+    this.networkNodes = [];
 
     this.createNewBlock(100, '0', '0');
 };
@@ -30,17 +36,22 @@ Blockchain.prototype.getLastBlock = function () {
     return this.chain[this.chain.length - 1];
 };
 
-//Cria uma nova transação e retorna o local da mesma na cadeia
+//Cria uma nova transação
 Blockchain.prototype.createNewTransaction = function (tamanho, remetente, destinatario) {
 
     const newTransaction = {
         amount: tamanho,
         sender: remetente,
-        recipient: destinatario
-    }
+        recipient: destinatario,
+        transactionId: uuid().split('-').join('')
+    };
 
-    // coloca a transação em pendentes para ser colocada no bloco
-    this.pedingTransactions.push(newTransaction);
+    return newTransaction;
+};
+
+Blockchain.prototype.addTransactionToPendingTransactions = function (transactionObj) {
+
+    this.pedingTransactions.push(transactionObj);
 
     return this.getLastBlock()['index'] + 1;
 };
@@ -68,6 +79,6 @@ Blockchain.prototype.proofOfWork = function (previousBlockHash, currentBlockData
     console.log('Hash criada:', hash);
     //incrementa o nonce até ser um numero que gere um hash com 4 numeros zeros
     return nonce;
-}
+};
 
 module.exports = Blockchain;
